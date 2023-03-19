@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.choco.chocomap.searchmap.Dao.SearchMapDao">
+    
+    <select id="lockKeyword" parameterType="String" resultType="int">
+        SELECT view_cnt FROM searchKeyword WHERE keyword = '${keyword}' FOR UPDATE
+    </select>
+    
+    <insert id="insertKeyword" parameterType="String">
+        MERGE INTO searchKeyword
+        USING (SELECT '${keyword}' as keyword, 1 as view_cnt) new_row
+        ON (searchKeyword.keyword = new_row.keyword)
+        WHEN MATCHED THEN
+            UPDATE
+            SET searchKeyword.view_cnt = searchKeyword.view_cnt + 1
+                , searchKeyword.update_time = CURRENT_TIMESTAMP
+        WHEN NOT MATCHED THEN
+            INSERT (keyword,
+                    view_cnt,
+                    insert_time,
+                    update_time)
+            VALUES (
+                new_row.keyword,
+                1,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP)
+    </insert>
+    
+    <select id="selectKeywordList" resultType ="com.choco.chocomap.searchmap.Dto.KeywordDto">
+        SELECT keyword, view_cnt
+        FROM searchKeyword
+        ORDER BY view_cnt DESC, keyword
+        LIMIT 10
+    </select>
+    
+</mapper>
+
