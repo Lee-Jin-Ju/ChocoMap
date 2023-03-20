@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ErrorResponse  {
 	
-	private int rspCode;
-    private String rspMessage;
-	
-    public ErrorResponse (int rspCode, String rspMessage){
-		this.rspCode = rspCode;
-		this.rspMessage = rspMessage;
+	private String rsp_code;
+    private String rsp_message;
+
+    public ErrorResponse (String rsp_code, String rsp_message){
+		this.rsp_code = rsp_code;
+		this.rsp_message = rsp_message;
 	}
 }

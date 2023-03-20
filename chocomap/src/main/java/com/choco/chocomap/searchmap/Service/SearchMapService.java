@@ -12,48 +12,47 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.choco.chocomap.searchmap.Dao.SearchMapDao;
 import com.choco.chocomap.searchmap.Dto.KeywordDto;
 import com.choco.chocomap.searchmap.Dto.PlaceDto;
 import com.choco.chocomap.searchmap.Dto.SearchListPlaceDto;
-import com.choco.chocomap.searchmap.common.ErrorResponse;
-import com.choco.chocomap.searchmap.common.ErrorResponseException;
+import com.choco.chocomap.searchmap.common.ApiProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Transactional
+@Component
 public class SearchMapService {
 
 
-    @Value("${kakao.api.key}")
+    @Value("${api.kakao.key}")
     private String apiKey;
     
-    @Value("${X-Naver-Client-Id}")
+    @Value("${api.naver.clientId}")
     private String clientId;
     
-    @Value("${X-Naver-Client-Secret}")
+    @Value("${api.naver.clientSecret}")
     private String clientSecret;
     
-    @Value("${kakaoApiUrl}")
+    @Value("${api.kakao.url}")
     private String kakaoApiUrl;
     
-    @Value("${naverApiUrl}")
+    @Value("${api.naver.url}")
     private String naverApiUrl;
     
-    List<PlaceDto> listPlacesResKakao;
-    List<KeywordDto> listKeywordDto;
     
     @Autowired
     SearchMapDao searchMapDao;
+    
+    @Autowired
+    ApiProperties apiProperties;
     
     public SearchListPlaceDto searchKeywordMain(String keyword) {
     	SearchListPlaceDto searchListPlaceDto = new SearchListPlaceDto();
@@ -64,51 +63,37 @@ public class SearchMapService {
     	Map<String, PlaceDto> resultMapNaverPlus = new HashMap<>();
     	List<PlaceDto> returnSearchResult = new ArrayList<>();
     	
-    	try {
-            String searchResultForKakao = searchKeywordForKakao(keyword,1,5);
-            
-            List<PlaceDto> listPlacesResKakao = searchKeywordJsonToDto(searchResultForKakao, "documents", "place_name", "road_address_name", "address_name", "place_url", "category_name", "phone", "Kakao");
-    		
-    		String searchResultForNaver = searchKeywordForNaver(keyword,1,5);
-    		List<PlaceDto> listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
-    		
-    		
-    		resultMapKakao = searchKeywordListToMap(resultMapKakao, listPlacesResKakao);
-    		resultMapNaver = searchKeywordListToMap(resultMapNaver, listPlacesResNaver);
-    		
-    		int removeCount = removeResultKeywordList(returnSearchResult, resultMapKakao, resultMapNaver, "init");
-    		
-    		if(removeCount>0) {
-    			searchResultForNaver = searchKeywordForNaver(keyword,2,removeCount);
-    			listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
-    			resultMapResultList = searchKeywordListToMap(resultMapResultList, returnSearchResult);
-    			resultMapNaverPlus = searchKeywordListToMap(resultMapNaverPlus, listPlacesResNaver);
-    			
-    			removeResultKeywordList(returnSearchResult, resultMapResultList, resultMapNaverPlus, "listPlus");
-    		}
-    		
-            searchListPlaceDto = SearchListPlaceDto.builder()
-            			.listPlace((List<PlaceDto>)returnSearchResult)
-            			.place_tot_count(returnSearchResult.size())
-            			.build();
-           
-//          동시성 문제를 해결을 위한 락 설정
-            searchMapDao.lockKeyword(keyword);
-            searchMapDao.insertKeyword(keyword);
+		String searchResultForKakao = searchKeywordForKakao(keyword,1,5);
         
-    	} catch (HttpClientErrorException ex) {
-    		
-    	    throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new ErrorResponse(ex.getRawStatusCode(), ex.getStatusText()));
-    	    
-    	} catch (HttpServerErrorException ex) {
-    		
-    	    throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new ErrorResponse(ex.getRawStatusCode(), ex.getStatusText()));
-    	    
-    	} catch (Exception ex) {
-    		
-    	    throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new ErrorResponse(500, ex.getMessage()));
-    	}
-
+		List<PlaceDto> listPlacesResKakao = searchKeywordJsonToDto(searchResultForKakao, "documents", "place_name", "road_address_name", "address_name", "place_url", "category_name", "phone", "Kakao");
+		
+		String searchResultForNaver = searchKeywordForNaver(keyword,1,5);
+		List<PlaceDto> listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
+		
+		
+		resultMapKakao = searchKeywordListToMap(resultMapKakao, listPlacesResKakao);
+		resultMapNaver = searchKeywordListToMap(resultMapNaver, listPlacesResNaver);
+		
+		int removeCount = removeResultKeywordList(returnSearchResult, resultMapKakao, resultMapNaver, "init");
+		
+		if(removeCount>0) {
+			searchResultForNaver = searchKeywordForNaver(keyword,2,removeCount);
+			listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
+			resultMapResultList = searchKeywordListToMap(resultMapResultList, returnSearchResult);
+			resultMapNaverPlus = searchKeywordListToMap(resultMapNaverPlus, listPlacesResNaver);
+			
+			removeResultKeywordList(returnSearchResult, resultMapResultList, resultMapNaverPlus, "listPlus");
+		}
+		
+        searchListPlaceDto = SearchListPlaceDto.builder()
+        			.listPlace((List<PlaceDto>)returnSearchResult)
+        			.place_tot_count(returnSearchResult.size())
+        			.build();
+       
+//          동시성 문제를 해결을 위한 락 설정
+        searchMapDao.lockKeyword(keyword);
+        searchMapDao.insertKeyword(keyword);
+        
         return searchListPlaceDto;
     	
     }
@@ -224,14 +209,14 @@ public class SearchMapService {
 
             for (Map<String, Object> document : documents) {
             	PlaceDto dto = PlaceDto.builder()
-                		.place_name(searchCommonCode((String) document.get(placeName), "keyName"))
-                		.place_road_address_name((String) document.get(placeRoadAdd))
-                		.place_address_name((String) document.get(placeAdd))
-                		.place_url((String) document.get(placeUrl))
-                		.place_category_name((String) document.get(ctg))
-                		.place_phone((String) document.get(phn))
-                		.place_search_site((String) searchSite)
-                		.build();
+					                		.place_name(searchCommonCode((String) document.get(placeName), "keyName"))
+					                		.place_road_address_name((String) document.get(placeRoadAdd))
+					                		.place_address_name((String) document.get(placeAdd))
+					                		.place_url((String) document.get(placeUrl))
+					                		.place_category_name((String) document.get(ctg))
+					                		.place_phone((String) document.get(phn))
+					                		.place_search_site((String) searchSite)
+					                		.build();
             	listPlaces.add(dto);
             }
             
@@ -253,30 +238,41 @@ public class SearchMapService {
         return response.getBody();
         
     }
-
-    public String searchKeywordForKakao(String keyword, int page, int size) {
-        String url = kakaoApiUrl + "?query=" + keyword + "&size="+size;
+    
+    private HttpHeaders createHeaders(String apiKey) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + apiKey);
-        
+        headers.set("Authorization", apiKey);
+        return headers;
+    }
+    
+    private HttpHeaders createHeaders(String clientId, String clientSecret) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", clientId);
+        headers.add("X-Naver-Client-Secret", clientSecret);
+        return headers;
+    }
+
+//    새로운 검색 API 제공자 추가부분
+    public String searchKeywordForKakao(String keyword, int page, int size) {
+    	String url = apiProperties.getKakao().getUrl() + "?query=" + keyword + "&size=" + size;
+        HttpHeaders headers = createHeaders("KakaoAK " + apiProperties.getKakao().getKey());
+
         return searchKeywordApiResult(url, headers);
         
     }
         
     public String searchKeywordForNaver(String keyword, int page, int size) {
-        String url = naverApiUrl + "?query=" + keyword + "&display="+size+"&start="+page;
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Naver-Client-Id", clientId);
-        headers.add("X-Naver-Client-Secret", clientSecret);
-        
+    	String url = apiProperties.getNaver().getUrl() + "?query=" + keyword + "&display=" + size + "&start=" + page;
+        HttpHeaders headers = createHeaders(apiProperties.getNaver().getClientId(), apiProperties.getNaver().getClientSecret());
+
         return searchKeywordApiResult(url, headers);
          
     }
     
+//    상위 10개의 검색 키워드 목록
     public List<KeywordDto> selectKeywordList() {
-        
-    	listKeywordDto = searchMapDao.selectKeywordList();
-        
+    	List<KeywordDto> listKeywordDto = searchMapDao.selectKeywordList();
+    	
         return listKeywordDto;
     }
     
