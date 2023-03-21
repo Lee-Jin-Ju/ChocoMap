@@ -27,7 +27,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+	public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     	String ipAddress = request.getRemoteAddr();
         Bucket bucket = buckets.computeIfAbsent(ipAddress, k ->
                 Bucket4j.builder()
