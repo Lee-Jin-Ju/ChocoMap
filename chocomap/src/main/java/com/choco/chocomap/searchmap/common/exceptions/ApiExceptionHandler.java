@@ -40,9 +40,7 @@ public class ApiExceptionHandler {
             	message = jsonNode.get("errorMessage").asText();
             }else {
             	code = ex.getStatusCode().toString();
-            	System.out.println(">>//"+code);
             	message = ex.getResponseBodyAsString();
-            	System.out.println(">>/2/"+message);
             }
             ErrorResponse response = new ErrorResponse(code, message);
             return new ResponseEntity<>(response, ex.getStatusCode());
@@ -96,17 +94,5 @@ public class ApiExceptionHandler {
 	    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 	
-//	
-//	@ExceptionHandler(ErrorResponseException.class)
-//    public ResponseEntity<CommonErrorCode> handleKakaoApiException(ErrorResponseException ex) {
-//		log.debug("Unexpected exception occurred", ex);
-//		ErrorResponse rspError = ex.getErrorResponse();
-//		CommonErrorCode apiError = CommonErrorCode.builder()
-//				.status(ex.getHttpStatus())
-//				.rspMessage(rspError.getRspMessage())
-//				.timestamp(LocalDateTime.now())
-//				.build();
-//        return new ResponseEntity<>(apiError, new HttpHeaders(), ex.getHttpStatus());
-//    }
 
 }

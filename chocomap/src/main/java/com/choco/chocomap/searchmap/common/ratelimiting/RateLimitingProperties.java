@@ -1,31 +1,27 @@
 package com.choco.chocomap.searchmap.common.ratelimiting;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Configuration
+@Component
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "rate-limiting")
+@ConfigurationProperties(prefix = "rate")
 public class RateLimitingProperties {
 	private int capacity;
-    private int refillTokens;
+    private int refillRate;
     private int refillDuration;
-    private TimeUnit refillUnit;
 
-    RateLimitingProperties (int capacity, int refillTokens, int refillDuration, TimeUnit refillUnit){
+    RateLimitingProperties (int capacity, int refillRate, int refillDuration){
 		this.capacity = capacity;
-		this.refillTokens = refillTokens;
+		this.refillRate = refillRate;
 		this.refillDuration = refillDuration;
-		this.refillUnit = refillUnit;
 	}
 }

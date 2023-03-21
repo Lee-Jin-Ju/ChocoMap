@@ -32,22 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Transactional
 public class SearchMapService {
 
-
-//    @Value("${api.kakao.key}")
-//    private String apiKey;
-//    
-//    @Value("${api.naver.clientId}")
-//    private String clientId;
-//    
-//    @Value("${api.naver.clientSecret}")
-//    private String clientSecret;
-//    
-//    @Value("${api.kakao.url}")
-//    private String kakaoApiUrl;
-//    
-//    @Value("${api.naver.url}")
-//    private String naverApiUrl;
-    
     
     @Autowired
     SearchMapDao searchMapDao;
@@ -66,7 +50,6 @@ public class SearchMapService {
     	List<PlaceDto> returnSearchResult = new ArrayList<>();
     	
 		List<PlaceDto> listPlacesResKakao = searchKeywordJsonToDto(searchKeywordForKakao(keyword,1,5), ApiFieldForm.KAKAO);
-		
 		List<PlaceDto> listPlacesResNaver = searchKeywordJsonToDto(searchKeywordForNaver(keyword,1,5), ApiFieldForm.NAVER);
 		
 		
@@ -96,17 +79,16 @@ public class SearchMapService {
     	
     }
     
+//    카카오와 네이버 검색 키워드 이름과 주소 유사도 80%이상 시 네이버 키워드 제거
     public int removeResultKeywordList(List<PlaceDto> returnSearchResult, Map<String, PlaceDto> resultMapKakao, Map<String, PlaceDto> resultMapNaver, ApiFlagForm flag) {
     	
     	int removeCount = 0;
-		
         for( String keyKakao : resultMapKakao.keySet() ){
         	
         	Iterator<String> keyNaverIterator = resultMapNaver.keySet().iterator();
 
         	while (keyNaverIterator.hasNext()) {
                 String keyNaver = keyNaverIterator.next();
-                
         		long dpNum = searchKeywordLCSCount(keyKakao, keyNaver);
         		long maxNum;
         		

@@ -11,5 +11,5 @@ public class ChocomapApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ChocomapApplication.class, args);
 	}
-
+	
 }
