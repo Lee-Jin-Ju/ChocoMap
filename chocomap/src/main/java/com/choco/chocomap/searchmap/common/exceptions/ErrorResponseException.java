@@ -1,6 +1,8 @@
-package com.choco.chocomap.searchmap.common;
+package com.choco.chocomap.searchmap.common.exceptions;
 
 import org.springframework.http.HttpStatus;
+
+import com.choco.chocomap.searchmap.common.ErrorResponse;
 
 import lombok.Builder;
 import lombok.Getter;

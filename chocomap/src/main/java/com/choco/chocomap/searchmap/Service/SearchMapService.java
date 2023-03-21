@@ -22,30 +22,31 @@ import com.choco.chocomap.searchmap.Dao.SearchMapDao;
 import com.choco.chocomap.searchmap.Dto.KeywordDto;
 import com.choco.chocomap.searchmap.Dto.PlaceDto;
 import com.choco.chocomap.searchmap.Dto.SearchListPlaceDto;
+import com.choco.chocomap.searchmap.common.ApiFieldForm;
+import com.choco.chocomap.searchmap.common.ApiFlagForm;
 import com.choco.chocomap.searchmap.common.ApiProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Transactional
-@Component
 public class SearchMapService {
 
 
-    @Value("${api.kakao.key}")
-    private String apiKey;
-    
-    @Value("${api.naver.clientId}")
-    private String clientId;
-    
-    @Value("${api.naver.clientSecret}")
-    private String clientSecret;
-    
-    @Value("${api.kakao.url}")
-    private String kakaoApiUrl;
-    
-    @Value("${api.naver.url}")
-    private String naverApiUrl;
+//    @Value("${api.kakao.key}")
+//    private String apiKey;
+//    
+//    @Value("${api.naver.clientId}")
+//    private String clientId;
+//    
+//    @Value("${api.naver.clientSecret}")
+//    private String clientSecret;
+//    
+//    @Value("${api.kakao.url}")
+//    private String kakaoApiUrl;
+//    
+//    @Value("${api.naver.url}")
+//    private String naverApiUrl;
     
     
     @Autowired
@@ -53,7 +54,8 @@ public class SearchMapService {
     
     @Autowired
     ApiProperties apiProperties;
-    
+
+    	
     public SearchListPlaceDto searchKeywordMain(String keyword) {
     	SearchListPlaceDto searchListPlaceDto = new SearchListPlaceDto();
     	
@@ -63,29 +65,25 @@ public class SearchMapService {
     	Map<String, PlaceDto> resultMapNaverPlus = new HashMap<>();
     	List<PlaceDto> returnSearchResult = new ArrayList<>();
     	
-		String searchResultForKakao = searchKeywordForKakao(keyword,1,5);
-        
-		List<PlaceDto> listPlacesResKakao = searchKeywordJsonToDto(searchResultForKakao, "documents", "place_name", "road_address_name", "address_name", "place_url", "category_name", "phone", "Kakao");
+		List<PlaceDto> listPlacesResKakao = searchKeywordJsonToDto(searchKeywordForKakao(keyword,1,5), ApiFieldForm.KAKAO);
 		
-		String searchResultForNaver = searchKeywordForNaver(keyword,1,5);
-		List<PlaceDto> listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
+		List<PlaceDto> listPlacesResNaver = searchKeywordJsonToDto(searchKeywordForNaver(keyword,1,5), ApiFieldForm.NAVER);
 		
 		
 		resultMapKakao = searchKeywordListToMap(resultMapKakao, listPlacesResKakao);
 		resultMapNaver = searchKeywordListToMap(resultMapNaver, listPlacesResNaver);
 		
-		int removeCount = removeResultKeywordList(returnSearchResult, resultMapKakao, resultMapNaver, "init");
+		int removeCount = removeResultKeywordList(returnSearchResult, resultMapKakao, resultMapNaver, ApiFlagForm.INIT);
 		
 		if(removeCount>0) {
-			searchResultForNaver = searchKeywordForNaver(keyword,2,removeCount);
-			listPlacesResNaver = searchKeywordJsonToDto(searchResultForNaver, "items", "title", "roadAddress", "address", "link", "category", "telephone", "Naver");
+			listPlacesResNaver = searchKeywordJsonToDto(searchKeywordForNaver(keyword,2,removeCount), ApiFieldForm.NAVER);
 			resultMapResultList = searchKeywordListToMap(resultMapResultList, returnSearchResult);
 			resultMapNaverPlus = searchKeywordListToMap(resultMapNaverPlus, listPlacesResNaver);
 			
-			removeResultKeywordList(returnSearchResult, resultMapResultList, resultMapNaverPlus, "listPlus");
+			removeResultKeywordList(returnSearchResult, resultMapResultList, resultMapNaverPlus, ApiFlagForm.LIST_PLUS);
 		}
-		
-        searchListPlaceDto = SearchListPlaceDto.builder()
+
+		searchListPlaceDto = SearchListPlaceDto.builder()
         			.listPlace((List<PlaceDto>)returnSearchResult)
         			.place_tot_count(returnSearchResult.size())
         			.build();
@@ -98,7 +96,7 @@ public class SearchMapService {
     	
     }
     
-    public int removeResultKeywordList(List<PlaceDto> returnSearchResult, Map<String, PlaceDto> resultMapKakao, Map<String, PlaceDto> resultMapNaver, String flag) {
+    public int removeResultKeywordList(List<PlaceDto> returnSearchResult, Map<String, PlaceDto> resultMapKakao, Map<String, PlaceDto> resultMapNaver, ApiFlagForm flag) {
     	
     	int removeCount = 0;
 		
@@ -124,7 +122,8 @@ public class SearchMapService {
         		}
         		
             }
-        	if(flag.equals("init")) {
+        	switch(flag) {
+        	case INIT :
         		returnSearchResult.add(resultMapKakao.get(keyKakao));
         	}
         }
@@ -165,7 +164,7 @@ public class SearchMapService {
     	for(PlaceDto resDto : listPlacesResName) {
 			String keyName = resDto.getPlace_name();
 	        String sumKeyName = keyName + resDto.getPlace_address_name();
-	        String resultKeyName = searchCommonCode(sumKeyName, "keyMapName");
+	        String resultKeyName = searchCommonCode(sumKeyName, ApiFlagForm.REMAP_NAME);
 	        resultMap.put(resultKeyName, resDto);
 		}
     	
@@ -173,7 +172,7 @@ public class SearchMapService {
         
     }
     
-    public String searchCommonCode(String resultCommonCode, String flag) {
+    public String searchCommonCode(String resultCommonCode, ApiFlagForm flag) {
 			
 		Function<String, String> removeSpaces = s -> s.replaceAll("\\s+", "");
         Function<String, String> removeTags = s -> s.replaceAll("<[^>]*>", "");
@@ -183,12 +182,12 @@ public class SearchMapService {
 												    	        .replaceAll("&lt;", "")
 												    	        .replaceAll("&gt;", "");
         switch(flag) {
-        	case "keyMapName" :
+        	case REMAP_NAME :
         		resultCommonCode = removeSpaces
 										.andThen(removeHtmlSpecialChars)
 										.andThen(removeTags)
 										.apply(resultCommonCode);
-        	case "keyName" : 
+        	case RENAME : 
         		resultCommonCode = removeTags
 										.andThen(removeHtmlSpecialChars)
 										.apply(resultCommonCode);
@@ -198,30 +197,26 @@ public class SearchMapService {
         
     }
     
-    public List<PlaceDto> searchKeywordJsonToDto(String json, String listName, String placeName, String placeRoadAdd, String placeAdd, String placeUrl, String ctg, String phn, String searchSite) {
+    public List<PlaceDto> searchKeywordJsonToDto(String json, ApiFieldForm apiField) {
     	
     	ObjectMapper objectMapper = new ObjectMapper();
     	List<PlaceDto> listPlaces = new ArrayList<>();
-    	
     	try {
-			Map<String, Object> responseJson = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
-            List<Map<String, Object>> documents = objectMapper.convertValue(responseJson.get(listName), new TypeReference<List<Map<String, Object>>>() {});
-
-            for (Map<String, Object> document : documents) {
-            	PlaceDto dto = PlaceDto.builder()
-					                		.place_name(searchCommonCode((String) document.get(placeName), "keyName"))
-					                		.place_road_address_name((String) document.get(placeRoadAdd))
-					                		.place_address_name((String) document.get(placeAdd))
-					                		.place_url((String) document.get(placeUrl))
-					                		.place_category_name((String) document.get(ctg))
-					                		.place_phone((String) document.get(phn))
-					                		.place_search_site((String) searchSite)
+	    	Map<String, Object> responseJson = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+	        List<Map<String, Object>> documents = objectMapper.convertValue(responseJson.get(apiField.getListKey()), new TypeReference<List<Map<String, Object>>>() {});
+	        for (Map<String, Object> document : documents) {
+	        	PlaceDto dto = PlaceDto.builder()
+					                		.place_name(searchCommonCode((String) document.get(apiField.getPlaceKey()), ApiFlagForm.RENAME))
+					                		.place_road_address_name((String) document.get(apiField.getRoadAddressKey()))
+					                		.place_address_name((String) document.get(apiField.getAddressKey()))
+					                		.place_url((String) document.get(apiField.getUrlKey()))
+					                		.place_category_name((String) document.get(apiField.getCategoryKey()))
+					                		.place_phone((String) document.get(apiField.getPhoneKey()))
+					                		.place_search_site((String) apiField.getSiteKey())
 					                		.build();
-            	listPlaces.add(dto);
-            }
-            
-
-        } catch (Exception e) {
+	        	listPlaces.add(dto);
+	        }
+    	} catch (Exception e) {
             e.printStackTrace();
         }
 
