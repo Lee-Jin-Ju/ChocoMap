@@ -22,6 +22,6 @@ public class AppRateLimitingConfig implements WebMvcConfigurer {
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
-
+ 
 }
 
