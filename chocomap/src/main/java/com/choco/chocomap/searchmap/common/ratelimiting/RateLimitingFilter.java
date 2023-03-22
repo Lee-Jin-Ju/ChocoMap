@@ -27,12 +27,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 	
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final RateLimitingProperties rateLimitingProperties;
 
-    public RateLimitingFilter(RateLimitingProperties rateLimitingProperties) {
-        this.rateLimitingProperties = rateLimitingProperties;
-    }
-
+    @Autowired
+    RateLimitingProperties rateLimitingProperties;
 
     @Override
 	public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
