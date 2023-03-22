@@ -36,7 +36,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     	String ipAddress = request.getRemoteAddr();
         Bucket bucket = buckets.computeIfAbsent(ipAddress, k ->
                 Bucket4j.builder()
-                        .addLimit(Bandwidth.classic(rateLimitingProperties.getRefillRate(), Refill.intervally(rateLimitingProperties.getCapacity(), Duration.ofSeconds(rateLimitingProperties.getRefillDuration()))))
+                        .addLimit(Bandwidth.classic(rateLimitingProperties.getCapacity(), Refill.intervally(rateLimitingProperties.getRefillRate(), Duration.ofSeconds(rateLimitingProperties.getRefillDuration()))))
                         .build()
         );
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
