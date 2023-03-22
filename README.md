@@ -1,19 +1,42 @@
 # ChocoMap
-> 장소 검색 OPEN API 서비스 프로그램  (카카오 장소 검색 API, 네이버 장소 검색 API 사용)  
-
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
-
-한 두 문단으로 프로젝트 소개 글을 작성합니다.
-
-## 🛠 Built With <a name="built-with"></a>
+> 장소 검색 OPEN API 서비스 프로그램  
 
 
+카카오 장소검색 API와 네이버 장소 검색 API를 사용하여 키워드 별 장소를 검색할 수 있습니다.<br/>
+가장 많이 조회한 상위 10개 검색 키워드 목록을 제공합니다.
 
-## API 규격
 
-< 키워드 검색 API >
+<br/>
+
+## :dart: Content
+
+- [🛠 Built With](#-built-with)
+- [📖 API 규격](#-api-규격)
+    + [키워드 검색 API](#키워드-검색-api)
+    + [상위 키워드 조회수 API](#상위-키워드-조회수-api)
+  * [:star2: 주요기능](#star2-주요기능)
+  * [:gem: 아키텍쳐](#gem-아키텍쳐)
+  * [🚀 클래스 설명](#-클래스-설명)
+  * [:triangular_flag_on_post: 테스트 방법](#triangular_flag_on_post-테스트-방법)
+
+<br/>
+
+## 🛠 Built With
+
+<img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white"> 
+<img src="https://img.shields.io/badge/Spring Boot-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white"> 
+<img src="https://img.shields.io/badge/h2 database-007396?style=for-the-badge&logo=h2 database&logoColor=white"> 
+
+<br/>
+
+## 📖 API 규격
+
+<br/>
+
+###  키워드 검색 API 
+
+
+
 
 - 기본 정보
 
@@ -43,9 +66,11 @@
 | Body      | --place_url      |     link    | 장소 상세페이지 URL |   N  |   String   |
 
 
+<br/>
+
+ ###  상위 키워드 조회수 API 
 
 
-< 상위 키워드 조회수 API >
 
 - 기본 정보
 
@@ -70,18 +95,9 @@
 
 
 
+<br/>
 
-
-## 개발 환경 설정
-
-모든 개발 의존성 설치 방법과 자동 테스트 슈트 실행 방법을 운영체제 별로 작성합니다.
-
-```sh
-make install
-npm test
-```
-
-## 주요기능
+## :star2: 주요기능
 
 1. 장소 검색 기능
    > 외부 API(카카오와 네이버)를 사용하여 클라이언트가 입력한 키워드로 장소를 검색합니다. 
@@ -113,7 +129,9 @@ npm test
 
 
 
-## 아키텍쳐
+<br/>
+
+## :gem: 아키텍쳐
 ```bash
 📦src
  ┣ 📂main
@@ -171,7 +189,11 @@ npm test
 ``` 
 
 
- ## 클래스 설명
+<br/>
+
+ ## 🚀 클래스 설명
+ 
+```sh
 
 * ApiExceptionHandler.java
   → @ExceptionHandler(HttpClientErrorException.class) : 
@@ -258,10 +280,13 @@ npm test
   
 * SearchMapServiceTest.java 
   → 장소검색 API, 상위검색어 메소드 단위테스트
-
+  
+```
+ 
+<br/> 
  
 
-## 태스트 방법
+## :triangular_flag_on_post: 테스트 방법
 
 < Swagger 테스트 방법 >
 
