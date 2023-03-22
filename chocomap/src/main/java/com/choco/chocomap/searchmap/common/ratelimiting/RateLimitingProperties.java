@@ -15,10 +15,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "rate")
 public class RateLimitingProperties {
-	private int capacity;
-    private int refillRate;
-    private int refillDuration;
-
+	public int capacity;
+	public int refillRate;
+	public int refillDuration;
+    
     RateLimitingProperties (int capacity, int refillRate, int refillDuration){
 		this.capacity = capacity;
 		this.refillRate = refillRate;

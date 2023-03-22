@@ -25,11 +25,15 @@ import io.github.bucket4j.Refill;
 
 public class RateLimitingFilter extends OncePerRequestFilter {
 	
-	@Autowired
-	RateLimitingProperties rateLimitingProperties;
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    
+    private final RateLimitingProperties rateLimitingProperties;
+
+    public RateLimitingFilter(RateLimitingProperties rateLimitingProperties) {
+        this.rateLimitingProperties = rateLimitingProperties;
+    }
+
+
     @Override
 	public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     	String ipAddress = request.getRemoteAddr();

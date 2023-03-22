@@ -10,10 +10,16 @@ import org.springframework.context.annotation.Bean;
 @Configuration
 public class AppRateLimitingConfig implements WebMvcConfigurer {
 
+	
+	@Bean
+	public RateLimitingFilter rateLimitingFilter(RateLimitingProperties rateLimitingProperties) {
+	   return new RateLimitingFilter(rateLimitingProperties);
+    }
+	
     @Bean
-    public FilterRegistrationBean<Filter> rateLimitFilter() {
-        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RateLimitingFilter());
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistrationBean(RateLimitingFilter rateLimitingFilter) {
+        FilterRegistrationBean<RateLimitingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(rateLimitingFilter);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
