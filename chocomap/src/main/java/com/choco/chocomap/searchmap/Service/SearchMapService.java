@@ -8,12 +8,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +25,8 @@ import com.choco.chocomap.searchmap.common.ApiFlagForm;
 import com.choco.chocomap.searchmap.common.ApiProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.annotations.ApiOperation;
 
 @Service
 @Transactional
@@ -79,7 +79,7 @@ public class SearchMapService {
     	
     }
     
-//    카카오와 네이버 검색 키워드 이름과 주소 유사도 80%이상 시 네이버 키워드 제거
+    @ApiOperation(value = "키워드 중복제거", notes = "카카오와 네이버 검색 키워드 이름과 주소 유사도 80%이상 시 네이버 키워드 제거")
     public int removeResultKeywordList(List<PlaceDto> returnSearchResult, Map<String, PlaceDto> resultMapKakao, Map<String, PlaceDto> resultMapNaver, ApiFlagForm flag) {
     	
     	int removeCount = 0;
@@ -121,7 +121,7 @@ public class SearchMapService {
     	
     }
     
-//    키워드 유사도 비교(카카오와 네이버 검색결과 비교)
+    @ApiOperation(value = "키워드 유사도 비교", notes = "키워드 유사도 비교(카카오와 네이버 검색결과 비교)")
     public int searchKeywordLCSCount(String keyKakao, String keyNaver) {
     	
     	int[][] dp = new int[keyKakao.length() + 1][keyNaver.length() + 1];
@@ -140,7 +140,7 @@ public class SearchMapService {
         
     }
     
-//    각각의 검색결과간 중복제거(장소명과 주소만)
+    @ApiOperation(value = "같은 검색결과 내 중복제거", notes = "각각의 검색결과간 중복제거(장소명과 주소만)")
     public Map<String, PlaceDto> searchKeywordListToMap(Map<String, PlaceDto> resultMap, List<PlaceDto> listPlacesResName) {
     	
     	for(PlaceDto resDto : listPlacesResName) {
@@ -154,6 +154,7 @@ public class SearchMapService {
         
     }
     
+    @ApiOperation(value = "키워드 공백제거", notes = "키워드 공백과 태그, HTML 엔티티 제거")
     public String searchCommonCode(String resultCommonCode, ApiFlagForm flag) {
 			
 		Function<String, String> removeSpaces = s -> s.replaceAll("\\s+", "");
@@ -179,6 +180,7 @@ public class SearchMapService {
         
     }
     
+    @ApiOperation(value = "DTO 변환", notes = "API에서 응답받은 JSON을 DTO로 변환")
     public List<PlaceDto> searchKeywordJsonToDto(String json, ApiFieldForm apiField) {
     	
     	ObjectMapper objectMapper = new ObjectMapper();
@@ -206,7 +208,7 @@ public class SearchMapService {
     	
     }
     
-//    새로운 검색 API 제공자의 추가 시 공통부분
+    @ApiOperation(value = "OPEN API 통신", notes = "새로운 검색 API 제공자의 추가 시 공통부분")
     public String searchKeywordApiResult(String url, HttpHeaders headers) {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         RestTemplate restTemplate = new RestTemplate();
@@ -216,12 +218,14 @@ public class SearchMapService {
         
     }
     
+    @ApiOperation(value = "헤더 생성", notes = "전송해야할 헤더 한개일 때")
     private HttpHeaders createHeaders(String apiKey) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", apiKey);
         return headers;
     }
     
+    @ApiOperation(value = "헤더 생성", notes = "전송해야할 헤더 두개일 때")
     private HttpHeaders createHeaders(String clientId, String clientSecret) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", clientId);
@@ -229,7 +233,7 @@ public class SearchMapService {
         return headers;
     }
 
-//    새로운 검색 API 제공자 추가부분
+    @ApiOperation(value = "API 설정", notes = "새로운 검색 API 제공자 추가부분")
     public String searchKeywordForKakao(String keyword, int page, int size) {
     	String url = apiProperties.getKakao().getUrl() + "?query=" + keyword + "&size=" + size;
         HttpHeaders headers = createHeaders("KakaoAK " + apiProperties.getKakao().getKey());
@@ -246,7 +250,7 @@ public class SearchMapService {
          
     }
     
-//    상위 10개의 검색 키워드 목록
+    @ApiOperation(value = "상위 조회수 키워드 목록", notes = "상위 10개의 검색 키워드 목록")
     public List<KeywordDto> selectKeywordList() {
     	List<KeywordDto> listKeywordDto = searchMapDao.selectKeywordList();
     	

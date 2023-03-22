@@ -15,12 +15,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
 @Slf4j
 public class ApiExceptionHandler {
 
+	@ApiOperation(value = "HttpClientErrorException 예외처리", notes = "카카오, 네이버의 외부API 송수신 시 외부 API 에러응답값 전달-상태코드 4xx번대")
 	@ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ErrorResponse> handleHttpClientErrorException(HttpClientErrorException ex) {
 		log.debug("Unexpected httpclient exception occurred", ex);
@@ -53,6 +55,7 @@ public class ApiExceptionHandler {
         }
     }
 	
+	@ApiOperation(value = "HttpServerErrorException 예외처리", notes = "카카오, 네이버의 외부API 송수신 시 외부 API 에러응답값 전달-상태코드 5xx번대")
 	@ExceptionHandler(HttpServerErrorException.class)
     public ResponseEntity<ErrorResponse> handleHttpServerErrorException(HttpServerErrorException ex) {
 		log.debug("Unexpected httpserver exception occurred", ex);
@@ -61,6 +64,7 @@ public class ApiExceptionHandler {
             
     }
 	
+	@ApiOperation(value = "MissingServletRequestParameterException 예외처리", notes = "request parameter가 없을 때 예외처리")
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
 		log.debug("Unexpected requestParam exception occurred", ex);
@@ -70,6 +74,7 @@ public class ApiExceptionHandler {
 	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
+	@ApiOperation(value = "IllegalArgumentException 예외처리", notes = "잘못된 입력값 발생 시 예외처리")
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
 	    log.debug("Unexpected IllegalArg exception occurred", ex);
@@ -78,6 +83,7 @@ public class ApiExceptionHandler {
 	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
+	@ApiOperation(value = "MethodArgumentNotValidException 예외처리", notes = "valid check 예외처리")
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 	    log.debug("Unexpected MethodArg exception occurred", ex);
@@ -85,7 +91,8 @@ public class ApiExceptionHandler {
 	    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), message);
 	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
-	
+
+	@ApiOperation(value = "NullPointerException 예외처리", notes = "null값 객체 호출 시 예외처리")
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException ex) {
 	    log.debug("Unexpected NullPoint exception occurred", ex);
@@ -93,7 +100,8 @@ public class ApiExceptionHandler {
 	    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), message);
 	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
-	
+
+	@ApiOperation(value = "NoHandlerFoundException 예외처리", notes = "잘못된 url 호출 시 예외처리")
 	@ExceptionHandler(NoHandlerFoundException.class)
 	public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
 	    log.debug("Unexpected NoHandlerFound exception occurred", ex);

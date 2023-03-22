@@ -3,6 +3,7 @@ package com.choco.chocomap.searchmap.common.ratelimiting;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
