@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,6 +24,9 @@ import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.Refill;
 
 public class RateLimitingFilter extends OncePerRequestFilter {
+	
+	@Autowired
+	RateLimitingProperties rateLimitingProperties;
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     
@@ -31,7 +35,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     	String ipAddress = request.getRemoteAddr();
         Bucket bucket = buckets.computeIfAbsent(ipAddress, k ->
                 Bucket4j.builder()
-                        .addLimit(Bandwidth.classic(10, Refill.intervally(10, Duration.ofSeconds(20))))
+                        .addLimit(Bandwidth.classic(rateLimitingProperties.getRefillRate(), Refill.intervally(rateLimitingProperties.getCapacity(), Duration.ofSeconds(rateLimitingProperties.getRefillDuration()))))
                         .build()
         );
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);

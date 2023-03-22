@@ -7,6 +7,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.choco.chocomap.searchmap.common.ErrorResponse;
@@ -52,6 +53,14 @@ public class ApiExceptionHandler {
         }
     }
 	
+	@ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<ErrorResponse> handleHttpServerErrorException(HttpServerErrorException ex) {
+		log.debug("Unexpected httpserver exception occurred", ex);
+        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Internal Server Error!");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            
+    }
+	
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
 		log.debug("Unexpected requestParam exception occurred", ex);
@@ -59,7 +68,6 @@ public class ApiExceptionHandler {
 	    String message = String.format("Required request parameter '%s' for method parameter type %s is not present", parameterName, ex.getParameterType());
 	    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), message);
 	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-	    
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
